@@ -5,7 +5,7 @@
 # Author: r3nt0n
 # Version: 1.0 (25/11/2022)
 
-version="1.1"
+version="1.2"
 /bin/echo -e "keepass4brute $version by r3nt0n"
 /bin/echo -e "https://github.com/r3nt0n/keepass4brute\n"
 
@@ -17,22 +17,23 @@ then
 fi
 
 dep="keepassxc-cli"
-command -v $dep >/dev/null 2>&1 || { /bin/echo >&2 "Error: $dep not installed.  Aborting."; exit 1; }
+command -v $dep >/dev/null 2>&1 || { /bin/echo >&2 "Error: $dep not installed. Aborting."; exit 1; }
 
 n_total=$( wc -l < $2 )
 n_tested=0
 
 IFS=''
 while read -r line; do
-  n_tested=$((n_tested + 1))
-  /bin/echo -ne "[+] Words tested: $n_tested/$n_total ($line)                                          \r"
-
-  /bin/echo $line | keepassxc-cli open $1 &> /dev/null
-  if [ $? -eq 0 ]
-  then
-    /bin/echo -ne "\n"
-    /bin/echo "[*] Password found: $line"; exit 0;
-  fi
+	n_tested=$((n_tested + 1))
+	/bin/echo -ne "[+] Words tested: $n_tested/$n_total ($line)                                          \r"
+	
+	if { /bin/echo $line | keepassxc-cli open $1 | grep -q $1; } > /dev/null 2>&1; then
+		# /bin/echo "+ $line" >> ~/keepasscrack/run.log
+		/bin/echo -ne "\n"
+		/bin/echo "[*] Password found: $line"; exit 0;
+	else
+		# /bin/echo "- $line" >> ~/keepasscrack/run.log
+	fi
 done < $2
 
 /bin/echo -ne "\n"
